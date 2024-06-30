@@ -1,1 +1,1 @@
-自动评测命令：check50 --local ai50/projects/2024/x/degrees
+自动评测命令：每个priject都配有命令，直接复制粘贴他给的命令即可
