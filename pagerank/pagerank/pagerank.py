@@ -57,24 +57,24 @@ def transition_model(corpus, page, damping_factor):
     linked to by `page`. With probability `1 - damping_factor`, choose
     a link at random chosen from all pages in the corpus.
     """
-
+    keys = corpus.keys()
     result = {}
     num_of_pages = len(corpus)
     probability_equal =  1 / num_of_pages
     if len(corpus[page]) == 0 :
-        for web_page in  corpus.keys() :
+        for web_page in  keys :
             result[web_page] = probability_equal
         return result
     else :
         probability_link = 1 / len(corpus[page])
-        for web_page in corpus.keys() :
+        for web_page in keys :
             result[web_page] = (1 - damping_factor) * probability_equal
         for link_page in corpus[page]:
             result[link_page] += damping_factor * probability_link
         return result
    
 
-
+import random
 
 def sample_pagerank(corpus, damping_factor, n):
     """
@@ -85,7 +85,24 @@ def sample_pagerank(corpus, damping_factor, n):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    raise NotImplementedError
+    samples = []
+    result = {}
+    i = 0
+    page = random.choice(list(corpus.keys()))
+    samples.append(page)
+    while i < n :
+        transition_probability = transition_model(corpus,page,damping_factor)
+        pages = list(transition_probability.keys())
+        probabilities = list(transition_probability.values())
+        page = random.choices(pages, weights=probabilities, k=1)[0]
+        samples.append(page)
+        i += 1
+    for web_page in corpus.keys() :
+        result[web_page] = len([target_page for target_page in samples if target_page == web_page]) / n
+    return result
+
+
+    
 
 
 def iterate_pagerank(corpus, damping_factor):
@@ -97,7 +114,36 @@ def iterate_pagerank(corpus, damping_factor):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    raise NotImplementedError
+    page_rank = {}
+    threshold = 0.001
+    is_converge = False
+    keys = corpus.keys()
+    N = len(keys)
+    for alone_page in keys:
+        if not corpus[alone_page] :
+            corpus[alone_page] = list(keys)
+
+    for page in keys:
+        page_rank[page] = 1 / N
+    while not is_converge:
+        is_converge = True
+        for web_page in keys:
+            old_rank = page_rank[web_page]
+            probability_i = 0
+            for link_page in keys:
+                # if link_page == web_page :
+                #     continue
+                if web_page in corpus[link_page] :
+                    probability_i += page_rank[link_page] / len(corpus[link_page]) 
+            page_rank[web_page] = (1 - damping_factor) / N + damping_factor  * (probability_i)
+            if abs(page_rank[web_page] - old_rank) > threshold:
+                is_converge = False
+    return page_rank
+            
+        
+
+    
+
 
 
 if __name__ == "__main__":
