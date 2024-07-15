@@ -307,6 +307,7 @@ class MinesweeperAI():
         This function may use the knowledge in self.mines, self.safes
         and self.moves_made, but should not modify any of those values.
         """
+        #确保
         for cell in self.safes:
             if cell not in self.moves_made:
                 return cell
