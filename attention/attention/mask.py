@@ -4,6 +4,7 @@ import tensorflow as tf
 from PIL import Image, ImageDraw, ImageFont
 from transformers import AutoTokenizer, TFBertForMaskedLM
 
+
 # Pre-trained masked language model
 MODEL = "bert-base-uncased"
 
@@ -16,6 +17,8 @@ GRID_SIZE = 40
 PIXELS_PER_WORD = 200
 
 
+
+
 def main():
     text = input("Text: ")
 
@@ -25,6 +28,7 @@ def main():
     mask_token_index = get_mask_token_index(tokenizer.mask_token_id, inputs)
     if mask_token_index is None:
         sys.exit(f"Input must include mask token {tokenizer.mask_token}.")
+
 
     # Use model to process input
     model = TFBertForMaskedLM.from_pretrained(MODEL)
@@ -46,8 +50,12 @@ def get_mask_token_index(mask_token_id, inputs):
     `None` if not present in the `inputs`.
     """
     # TODO: Implement this function
-    raise NotImplementedError
-
+    input_id = inputs['input_ids'].numpy().tolist()[0]
+    if mask_token_id in input_id:
+        return input_id.index(mask_token_id)
+    else:
+        return None
+  
 
 
 def get_color_for_attention_score(attention_score):
@@ -56,7 +64,20 @@ def get_color_for_attention_score(attention_score):
     given `attention_score`. Each value should be in the range [0, 255].
     """
     # TODO: Implement this function
-    raise NotImplementedError
+    # if attention_score == 0:
+    #     return (0,0,0)
+    # elif attention_score == 1:
+    #     return (255,255,255)
+    # else:
+    #     value = round(255 * attention_score)
+    #     return (value,value,value)
+    grey_value = round(255 * float(attention_score))
+    return (grey_value,grey_value,grey_value)
+
+
+
+
+
 
 
 
@@ -71,12 +92,19 @@ def visualize_attentions(tokens, attentions):
     (starting count from 1).
     """
     # TODO: Update this function to produce diagrams for all layers and heads.
-    generate_diagram(
-        1,
-        1,
-        tokens,
-        attentions[0][0][0]
-    )
+    for i, layer_attentions in enumerate(attentions):
+        for j, head_attention in enumerate(layer_attentions[0]):
+            generate_diagram(
+                i + 1,
+                j + 1,
+                tokens,
+                head_attention
+            )
+
+
+
+# no need to see stuff below
+
 
 
 def generate_diagram(layer_number, head_number, tokens, attention_weights):
